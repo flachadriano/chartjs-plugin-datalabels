@@ -6,6 +6,10 @@
   "license": "MIT",
   "main": "dist/chartjs-plugin-datalabels.js",
   "types": "types/index.d.ts",
+  "scripts": {
+    "build:watch": "gulp build --watch",
+    "build": "gulp build"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/chartjs/chartjs-plugin-datalabels.git"

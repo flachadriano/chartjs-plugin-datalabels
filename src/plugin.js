@@ -192,7 +192,7 @@ var plugin = {
 		var elements = args.meta.data || [];
 		var ctx = chart.ctx;
 		var i, j, ilen, jlen, cfg, key, el, label;
-
+		var hightestTopY = 0;
 		ctx.save();
 
 		for (i = 0, ilen = elements.length; i < ilen; ++i) {
@@ -217,6 +217,10 @@ var plugin = {
 						datasetIndex: datasetIndex
 					};
 
+					/* if (label.$layout._box._rect.y < hightestTopY) {
+						hightestTopY = label.$layout._box._rect.y;
+					} */
+
 					label.update(label.$context);
 					el[EXPANDO_KEY].push(label);
 					labels.push(label);
@@ -224,6 +228,9 @@ var plugin = {
 			}
 		}
 
+		console.log(labels[0])
+
+		console.log('hightestTopY: ', hightestTopY);
 		ctx.restore();
 
 		// Store listeners at the chart level and per event type to optimize

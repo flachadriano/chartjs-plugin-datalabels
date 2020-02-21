@@ -7,7 +7,7 @@ function coordinates(view, model, geometry) {
 
 	if (!vx && !vy) {
 		// if aligned center, we don't want to offset the center point
-		return {x: point.x, y: point.y};
+		return { x: point.x, y: point.y };
 	}
 
 	var w = geometry.w;
@@ -15,8 +15,12 @@ function coordinates(view, model, geometry) {
 
 	// take in account the label rotation
 	var rotation = model.rotation;
-	var dx = Math.abs(w / 2 * Math.cos(rotation)) + Math.abs(h / 2 * Math.sin(rotation));
-	var dy = Math.abs(w / 2 * Math.sin(rotation)) + Math.abs(h / 2 * Math.cos(rotation));
+	var dx =
+		Math.abs((w / 2) * Math.cos(rotation)) +
+		Math.abs((h / 2) * Math.sin(rotation));
+	var dy =
+		Math.abs((w / 2) * Math.sin(rotation)) +
+		Math.abs((h / 2) * Math.cos(rotation));
 
 	// scale the unit vector (vx, vy) to get at least dx or dy equal to
 	// w or h respectively (else we would calculate the distance to the
@@ -85,6 +89,13 @@ function compute(labels) {
 	});
 }
 
+function adjustChart(chart, center) {
+	if (center.y < 0) {
+		console.log(center.y, ' < ', 0, ' = ', center.y * -1);
+		chart.options.layout.padding.top = center.y * -1;
+	}
+}
+
 export default {
 	prepare: function(datasets) {
 		var labels = [];
@@ -111,9 +122,7 @@ export default {
 			var sa = a.$layout;
 			var sb = b.$layout;
 
-			return sa._idx === sb._idx
-				? sb._set - sa._set
-				: sb._idx - sa._idx;
+			return sa._idx === sb._idx ? sb._set - sa._set : sb._idx - sa._idx;
 		});
 
 		this.update(labels);
@@ -167,6 +176,7 @@ export default {
 				geometry = label.geometry();
 				center = coordinates(label._el._view, label.model(), geometry);
 				state._box.update(center, geometry, label.rotation());
+				adjustChart(chart, center);
 				label.draw(chart, center);
 			}
 		}

@@ -6,6 +6,7 @@ var helpers = Chart.helpers;
 var rasterize = utils.rasterize;
 
 function boundingRects(model) {
+
 	var borderWidth = model.borderWidth || 0;
 	var padding = model.padding;
 	var th = model.size.height;
@@ -48,16 +49,16 @@ function getScaleOrigin(el) {
 }
 
 function getPositioner(el) {
-	if (el instanceof Chart.elements.Arc) {
+	//if (el instanceof Chart.elements.Arc) {
 		return positioners.arc;
-	}
-	if (el instanceof Chart.elements.Point) {
-		return positioners.point;
-	}
-	if (el instanceof Chart.elements.Rectangle) {
-		return positioners.rect;
-	}
-	return positioners.fallback;
+	// }
+	// if (el instanceof Chart.elements.Point) {
+	// 	return positioners.point;
+	// }
+	// if (el instanceof Chart.elements.Rectangle) {
+	// 	return positioners.rect;
+	// }
+	// return positioners.fallback; */
 }
 
 function drawFrame(ctx, rect, model) {
