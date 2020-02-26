@@ -33,11 +33,9 @@ function configure(dataset, options) {
 	if (keys.length) {
 		keys.forEach(function(key) {
 			if (labels[key]) {
-				configs.push(helpers.merge({}, [
-					options,
-					labels[key],
-					{_key: key}
-				]));
+				configs.push(
+					helpers.merge({}, [options, labels[key], {_key: key}])
+				);
 			}
 		});
 	} else {
@@ -167,32 +165,32 @@ Chart.defaults.global.plugins.datalabels = defaults;
 
 var plugin = {
 	id: 'datalabels',
-
 	beforeInit: function(chart) {
 		chart[EXPANDO_KEY] = {
 			_actives: []
 		};
 	},
-
-	beforeUpdate: function(chart) {
+	beforeUpdate: function(chart, options) {
 		var expando = chart[EXPANDO_KEY];
 		expando._listened = false;
-		expando._listeners = {};     // {<event-type>: {<dataset-index>: {<label-key>: <fn>}}}
-		expando._datasets = [];      // per dataset labels: [Label[]]
-		expando._labels = [];        // layouted labels: Label[]
+		expando._listeners = {}; // {<event-type>: {<dataset-index>: {<label-key>: <fn>}}}
+		expando._datasets = []; // per dataset labels: [Label[]]
+		expando._labels = []; // layouted labels: Label[]
+		chart[EXPANDO_KEY]._labels = layout.prepare(
+			chart[EXPANDO_KEY]._datasets,
+			options
+		);
 	},
-
 	afterDatasetUpdate: function(chart, args, options) {
 		var datasetIndex = args.index;
 		var expando = chart[EXPANDO_KEY];
-		var labels = expando._datasets[datasetIndex] = [];
+		var labels = (expando._datasets[datasetIndex] = []);
 		var visible = chart.isDatasetVisible(datasetIndex);
 		var dataset = chart.data.datasets[datasetIndex];
 		var config = configure(dataset, options);
 		var elements = args.meta.data || [];
 		var ctx = chart.ctx;
 		var i, j, ilen, jlen, cfg, key, el, label;
-		var hightestTopY = 0;
 		ctx.save();
 
 		for (i = 0, ilen = elements.length; i < ilen; ++i) {
@@ -217,10 +215,6 @@ var plugin = {
 						datasetIndex: datasetIndex
 					};
 
-					/* if (label.$layout._box._rect.y < hightestTopY) {
-						hightestTopY = label.$layout._box._rect.y;
-					} */
-
 					label.update(label.$context);
 					el[EXPANDO_KEY].push(label);
 					labels.push(label);
@@ -228,9 +222,6 @@ var plugin = {
 			}
 		}
 
-		console.log(labels[0])
-
-		console.log('hightestTopY: ', hightestTopY);
 		ctx.restore();
 
 		// Store listeners at the chart level and per event type to optimize
@@ -243,20 +234,29 @@ var plugin = {
 			}
 		});
 	},
-
 	afterUpdate: function(chart, options) {
 		chart[EXPANDO_KEY]._labels = layout.prepare(
 			chart[EXPANDO_KEY]._datasets,
-			options);
+			options
+		);
 	},
-
-	// Draw labels on top of all dataset elements
-	// https://github.com/chartjs/chartjs-plugin-datalabels/issues/29
-	// https://github.com/chartjs/chartjs-plugin-datalabels/issues/32
+	afterRender: function(chart, options) {
+		if (options.clamp) {
+			layout.adjustLayout(chart, chart.$datalabels._labels, function() {
+				for (var i = 0; i < chart.$datalabels._labels.length; i++) {
+					var label = chart.$datalabels._labels[i];
+					chart.$datalabels._labels[i].isRendered = true;
+					label.renderTexts(chart, layout.center[i]);
+				}
+			});
+		}
+	},
 	afterDatasetsDraw: function(chart) {
 		layout.draw(chart, chart[EXPANDO_KEY]._labels);
 	},
-
+	// Draw labels on top of all dataset elements
+	// https://github.com/chartjs/chartjs-plugin-datalabels/issues/29
+	// https://github.com/chartjs/chartjs-plugin-datalabels/issues/32
 	beforeEvent: function(chart, event) {
 		// If there is no listener registered for this chart, `listened` will be false,
 		// meaning we can immediately ignore the incoming event and avoid useless extra
@@ -274,11 +274,10 @@ var plugin = {
 			}
 		}
 	},
-
 	afterEvent: function(chart) {
 		var expando = chart[EXPANDO_KEY];
 		var previous = expando._actives;
-		var actives = expando._actives = chart.lastActive || [];  // public API?!
+		var actives = (expando._actives = chart.lastActive || []); // public API?!
 		var updates = utils.arrayDiff(previous, actives);
 		var i, ilen, j, jlen, update, label, labels;
 
@@ -288,7 +287,7 @@ var plugin = {
 				labels = update[0][EXPANDO_KEY] || [];
 				for (j = 0, jlen = labels.length; j < jlen; ++j) {
 					label = labels[j];
-					label.$context.active = (update[1] === 1);
+					label.$context.active = update[1] === 1;
 					label.update(label.$context);
 				}
 			}

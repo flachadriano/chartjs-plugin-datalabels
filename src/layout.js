@@ -1,13 +1,15 @@
 import HitBox from './hitbox';
+import Positioner from './positioners';
 
 function coordinates(view, model, geometry) {
 	var point = model.positioner(view, model);
+
 	var vx = point.vx;
 	var vy = point.vy;
 
 	if (!vx && !vy) {
 		// if aligned center, we don't want to offset the center point
-		return { x: point.x, y: point.y };
+		return {x: point.x, y: point.y};
 	}
 
 	var w = geometry.w;
@@ -89,14 +91,10 @@ function compute(labels) {
 	});
 }
 
-function adjustChart(chart, center) {
-	if (center.y < 0) {
-		console.log(center.y, ' < ', 0, ' = ', center.y * -1);
-		chart.options.layout.padding.top = center.y * -1;
-	}
-}
-
 export default {
+	center: {},
+	isAdjusted: false,
+	visible: false,
 	prepare: function(datasets) {
 		var labels = [];
 		var i, j, ilen, jlen, label;
@@ -166,7 +164,7 @@ export default {
 	},
 
 	draw: function(chart, labels) {
-		var i, ilen, label, state, geometry, center;
+		var i, ilen, label, state, geometry;
 
 		for (i = 0, ilen = labels.length; i < ilen; ++i) {
 			label = labels[i];
@@ -174,11 +172,41 @@ export default {
 
 			if (state._visible) {
 				geometry = label.geometry();
-				center = coordinates(label._el._view, label.model(), geometry);
-				state._box.update(center, geometry, label.rotation());
-				adjustChart(chart, center);
-				label.draw(chart, center);
+				label.center = coordinates(label._el._view, label.model(), geometry);
+				this.center[i] = label.center;
+				state._box.update(this.center, geometry, label.rotation());
+				label.draw(chart, label.center, this.visible);
 			}
+		}
+	},
+
+	adjustLayout: function(chart, labels, _fn) {
+		if (!this.isAdjusted) {
+			var paddings = {
+				top: 0,
+				right: 0,
+				bottom: 0,
+				left: 0
+			};
+
+			setTimeout(function() {
+				labels.forEach(function(label) {
+					var params = {
+						x: chart.width - (label.center.x + label.$layout._box._rect.w),
+						y: chart.height - (label.center.y + label.$layout._box._rect.h)
+					};
+
+					paddings.top = Positioner.exceededPositions.top(params, paddings.top);
+					paddings.right = Positioner.exceededPositions.right(chart.width, params, paddings.right);
+					paddings.bottom = Positioner.exceededPositions.bottom(params, paddings.bottom);
+					paddings.left = Positioner.exceededPositions.left(params, paddings.left);
+				});
+				chart.options.layout.padding = paddings;
+				chart.update();
+
+				setTimeout(_fn, chart.config.options.animation.duration / 2);
+			});
+			this.isAdjusted = true;
 		}
 	}
 };

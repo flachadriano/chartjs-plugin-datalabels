@@ -6,7 +6,6 @@ var helpers = Chart.helpers;
 var rasterize = utils.rasterize;
 
 function boundingRects(model) {
-
 	var borderWidth = model.borderWidth || 0;
 	var padding = model.padding;
 	var th = model.size.height;
@@ -43,22 +42,20 @@ function getScaleOrigin(el) {
 	}
 
 	var pixel = scale.getBasePixel();
-	return horizontal ?
-		{x: pixel, y: null} :
-		{x: null, y: pixel};
+	return horizontal ? {x: pixel, y: null} : {x: null, y: pixel};
 }
 
 function getPositioner(el) {
-	//if (el instanceof Chart.elements.Arc) {
+	if (el instanceof Chart.elements.Arc) {
 		return positioners.arc;
-	// }
-	// if (el instanceof Chart.elements.Point) {
-	// 	return positioners.point;
-	// }
-	// if (el instanceof Chart.elements.Rectangle) {
-	// 	return positioners.rect;
-	// }
-	// return positioners.fallback; */
+	}
+	if (el instanceof Chart.elements.Point) {
+		return positioners.point;
+	}
+	if (el instanceof Chart.elements.Rectangle) {
+		return positioners.rect;
+	}
+	return positioners.fallback;
 }
 
 function drawFrame(ctx, rect, model) {
@@ -78,7 +75,8 @@ function drawFrame(ctx, rect, model) {
 		rasterize(rect.y) + borderWidth / 2,
 		rasterize(rect.w) - borderWidth,
 		rasterize(rect.h) - borderWidth,
-		model.borderRadius);
+		model.borderRadius
+	);
 
 	ctx.closePath();
 
@@ -205,13 +203,21 @@ helpers.extend(Label.prototype, {
 		var index = me._index;
 		var resolve = helpers.options.resolve;
 		var font = utils.parseFont(resolve([config.font, {}], context, index));
-		var color = resolve([config.color, Chart.defaults.global.defaultFontColor], context, index);
+		var color = resolve(
+			[config.color, Chart.defaults.global.defaultFontColor],
+			context,
+			index
+		);
 
 		return {
 			align: resolve([config.align, 'center'], context, index),
 			anchor: resolve([config.anchor, 'center'], context, index),
 			area: context.chart.chartArea,
-			backgroundColor: resolve([config.backgroundColor, null], context, index),
+			backgroundColor: resolve(
+				[config.backgroundColor, null],
+				context,
+				index
+			),
 			borderColor: resolve([config.borderColor, null], context, index),
 			borderRadius: resolve([config.borderRadius, 0], context, index),
 			borderWidth: resolve([config.borderWidth, 0], context, index),
@@ -224,18 +230,33 @@ helpers.extend(Label.prototype, {
 			offset: resolve([config.offset, 0], context, index),
 			opacity: resolve([config.opacity, 1], context, index),
 			origin: getScaleOrigin(me._el),
-			padding: helpers.options.toPadding(resolve([config.padding, 0], context, index)),
+			padding: helpers.options.toPadding(
+				resolve([config.padding, 0], context, index)
+			),
 			positioner: getPositioner(me._el),
-			rotation: resolve([config.rotation, 0], context, index) * (Math.PI / 180),
+			rotation:
+				resolve([config.rotation, 0], context, index) * (Math.PI / 180),
 			size: utils.textSize(me._ctx, lines, font),
 			textAlign: resolve([config.textAlign, 'start'], context, index),
 			textShadowBlur: resolve([config.textShadowBlur, 0], context, index),
-			textShadowColor: resolve([config.textShadowColor, color], context, index),
-			textStrokeColor: resolve([config.textStrokeColor, color], context, index),
-			textStrokeWidth: resolve([config.textStrokeWidth, 0], context, index)
+			textShadowColor: resolve(
+				[config.textShadowColor, color],
+				context,
+				index
+			),
+			textStrokeColor: resolve(
+				[config.textStrokeColor, color],
+				context,
+				index
+			),
+			textStrokeWidth: resolve(
+				[config.textStrokeWidth, 0],
+				context,
+				index
+			)
 		};
 	},
-
+	isRendered: false,
 	update: function(context) {
 		var me = this;
 		var model = null;
@@ -246,12 +267,21 @@ helpers.extend(Label.prototype, {
 
 		// We first resolve the display option (separately) to avoid computing
 		// other options in case the label is hidden (i.e. display: false).
-		var display = helpers.options.resolve([config.display, true], context, index);
+		var display = helpers.options.resolve(
+			[config.display, true],
+			context,
+			index
+		);
 
 		if (display) {
 			value = context.dataset.data[index];
-			label = helpers.valueOrDefault(helpers.callback(config.formatter, [value, context]), value);
-			lines = helpers.isNullOrUndef(label) ? [] : utils.toTextLines(label);
+			label = helpers.valueOrDefault(
+				helpers.callback(config.formatter, [value, context]),
+				value
+			);
+			lines = helpers.isNullOrUndef(label)
+				? []
+				: utils.toTextLines(label);
 
 			if (lines.length) {
 				model = me._modelize(display, lines, config, context);
@@ -299,11 +329,43 @@ helpers.extend(Label.prototype, {
 				area.left,
 				area.top,
 				area.right - area.left,
-				area.bottom - area.top);
+				area.bottom - area.top
+			);
 			ctx.clip();
 		}
 
-		ctx.globalAlpha = utils.bound(0, model.opacity, 1);
+		if (this.isRendered || !model.clamp) {
+			ctx.globalAlpha = utils.bound(0, 1, 1);
+			ctx.translate(rasterize(center.x), rasterize(center.y));
+			ctx.rotate(model.rotation);
+
+			drawFrame(ctx, rects.frame, model);
+			drawText(ctx, model.lines, rects.text, model);
+
+			ctx.restore();
+		}
+	},
+	renderTexts: function(chart, center) {
+		var me = this;
+		var model = me._model;
+		var ctx = chart.ctx;
+		var rects = me._rects;
+
+		ctx.globalAlpha = utils.bound(0, 1, 1);
+		ctx.translate(rasterize(center.x), rasterize(center.y));
+		ctx.rotate(model.rotation);
+
+		drawText(ctx, model.lines, rects.text, model);
+
+		ctx.restore();
+	},
+	originRenderTexts: function(chart, center) {
+		var me = this;
+		var model = me._model;
+		var ctx = chart.ctx;
+		var rects = me._rects;
+
+		ctx.globalAlpha = utils.bound(0, 1, 1);
 		ctx.translate(rasterize(center.x), rasterize(center.y));
 		ctx.rotate(model.rotation);
 
