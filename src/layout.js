@@ -249,12 +249,16 @@ export default {
 					rightest: rightest,
 					lowest: lowest,
 					leftest: leftest,
-					paddings: paddings,
+					paddings: chart.options.layout.padding,
 					pT: paddingDataLabel.top,
 					pB: paddingDataLabel.bottom,
 					cW: chart.width,
 					cH: chart.height
 				};
+
+				if (chart.options.plugins.datalabels.debug) {
+					console.debug('data: ', data);
+				}
 
 				var top = Positioner.exceededPositions.top(data);
 				var right = Positioner.exceededPositions.right(data);
@@ -266,14 +270,11 @@ export default {
 				paddings.left = left !== 0 ? left : paddings.left;
 
 				if (chart.options.plugins.datalabels.debug) {
-					console.debug('data: ', data);
 					console.debug('paddings: ', paddings);
 				}
 
-				if (hasAdjustments(paddings)) {
-					chart.options.layout.padding = paddings;
-					chart.update();
-				}
+				chart.options.layout.padding = paddings;
+				chart.update();
 
 				setTimeout(_fn, chart.options.animation.duration / 2);
 			}, time);

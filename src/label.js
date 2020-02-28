@@ -49,10 +49,10 @@ function getPositioner(el) {
 	 	return positioners.arc;
 	// }
 	// if (el instanceof Chart.elements.Point) {
-		// return positioners.point;
+	// 	return positioners.point;
 	// }
 	// if (el instanceof Chart.elements.Rectangle) {
-		// return positioners.rect;
+	// 	return positioners.rect;
 	// }
 	// return positioners.fallback;
 }

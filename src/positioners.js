@@ -262,7 +262,7 @@ export default {
 			return 0;
 		},
 		bottom: function(rect) {
-			rect.lowest.y = rect.lowest.y - rect.paddings.bottom;
+			rect.lowest.y = rect.lowest.y + rect.paddings.bottom;
 			if (Math.floor(rect.lowest.y + (rect.lowest.h / 2)) > Math.floor(rect.cH)) {
 				return ((rect.lowest.y + (rect.lowest.h / 2)) - rect.cH) + securePadding;
 			}
