@@ -4,7 +4,7 @@
   "description": "Chart.js plugin to display labels on data elements with clamp function that adjust chart to show numbers",
   "version": "0.8.2",
   "license": "MIT",
-  "main": "@marcelorafael/dist/chartjs-plugin-datalabels.js",
+  "main": "dist/@marcelorafael/chartjs-plugin-datalabels.js",
   "types": "types/index.d.ts",
   "scripts": {
     "build:watch": "gulp build --watch",
