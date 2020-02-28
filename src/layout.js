@@ -1,5 +1,18 @@
+/* eslint-disable max-statements */
+/* eslint-disable complexity */
 import HitBox from './hitbox';
 import Positioner from './positioners';
+
+var adjustTimer;
+
+function hasAdjustments(paddings) {
+	for (var i = 0; i < Object.keys(paddings).length; i++) {
+		if (paddings[Object.keys(paddings)[i]] > 0) {
+			return true;
+		}
+	}
+	return false;
+}
 
 function coordinates(view, model, geometry) {
 	var point = model.positioner(view, model);
@@ -93,8 +106,9 @@ function compute(labels) {
 
 export default {
 	center: {},
-	isAdjusted: false,
+	isRendered: false,
 	visible: false,
+	isAdjusted: false,
 	prepare: function(datasets) {
 		var labels = [];
 		var i, j, ilen, jlen, label;
@@ -172,16 +186,21 @@ export default {
 
 			if (state._visible) {
 				geometry = label.geometry();
-				label.center = coordinates(label._el._view, label.model(), geometry);
+				label.center = coordinates(
+					label._el._view,
+					label.model(),
+					geometry
+				);
 				this.center[i] = label.center;
-				state._box.update(this.center, geometry, label.rotation());
-				label.draw(chart, label.center, this.visible);
+				state._box.update(label.center, geometry, label.rotation());
+				label.draw(chart, label.center);
 			}
 		}
 	},
-
-	adjustLayout: function(chart, labels, _fn) {
-		if (!this.isAdjusted) {
+	// eslint-disable-next-line max-statements
+	adjustLayout: function(chart, labels, _fn, time) {
+		console.log('chart: ', chart);
+		if (!chart.$datalabels._adjusted) {
 			var paddings = {
 				top: 0,
 				right: 0,
@@ -189,24 +208,130 @@ export default {
 				left: 0
 			};
 
-			setTimeout(function() {
-				labels.forEach(function(label) {
+			var highest = {h: 0, y: 0};
+			var rightest = {w: 0, x: 0};
+			var lowest = {h: 0, y: 0};
+			var leftest = {w: 0, x: 0};
+
+			clearTimeout(chart.$datalabels._adjustTimer);
+			chart.$datalabels._adjustTimer = setTimeout(function() {
+				/* labels.forEach(function(label) {
+					var paddingDataLabel =
+						chart.options &&
+						chart.options.plugins &&
+						chart.options.plugins.datalabels &&
+						chart.options.plugins.datalabels.padding
+							? chart.options.plugins.datalabels.padding
+							: {};
+
 					var params = {
-						x: chart.width - (label.center.x + label.$layout._box._rect.w),
-						y: chart.height - (label.center.y + label.$layout._box._rect.h)
+						x: label.center ? label.center.x : 0,
+						y: label.center ? label.center.y : 0,
+						w: label.$layout._box._rect.w,
+						h: label.$layout._box._rect.h,
+						pT: paddingDataLabel.top,
+						pB: paddingDataLabel.bottom,
+						cW: chart.width,
+						cH: chart.height
 					};
 
-					paddings.top = Positioner.exceededPositions.top(params, paddings.top);
-					paddings.right = Positioner.exceededPositions.right(chart.width, params, paddings.right);
-					paddings.bottom = Positioner.exceededPositions.bottom(params, paddings.bottom);
-					paddings.left = Positioner.exceededPositions.left(params, paddings.left);
-				});
-				chart.options.layout.padding = paddings;
-				chart.update();
+					console.log('params: ', params);
+
+					paddings.top = Positioner.exceededPositions.top(
+						params,
+						paddings.top
+					);
+					paddings.right = Positioner.exceededPositions.right(
+						params,
+						paddings.right
+					);
+					paddings.bottom = Positioner.exceededPositions.bottom(
+						params,
+						paddings.bottom
+					);
+					paddings.left = Positioner.exceededPositions.left(
+						params,
+						paddings.left
+					);
+				}); */
+
+				var paddingDataLabel =
+				chart.options &&
+				chart.options.plugins &&
+				chart.options.plugins.datalabels &&
+				chart.options.plugins.datalabels.padding
+					? chart.options.plugins.datalabels.padding
+					: {};
+				for (var i = 0; i < labels.length; i++) {
+					var label = labels[i];
+
+					var params = {
+						x: label.center ? label.center.x : 0,
+						y: label.center ? label.center.y : 0
+					};
+
+					if (!highest.y || params.y < highest.y) {
+						highest.y = params.y;
+						highest.h = label.$layout._box._rect.h;
+					}
+					if (!rightest.x || params.x > rightest.x) {
+						rightest.x = params.x;
+						rightest.w = label.$layout._box._rect.w;
+					}
+					if (!lowest.y || params.y > lowest.y) {
+						lowest.y = params.y;
+						lowest.h = label.$layout._box._rect.h;
+					}
+					if (!leftest.x || params.x < leftest.x) {
+						leftest.x = params.x;
+						leftest.w = label.$layout._box._rect.w;
+					}
+				}
+
+				console.log('highest: ', highest);
+				console.log('rightest: ', rightest);
+				console.log('lowest: ', lowest);
+				console.log('leftest: ', leftest);
+
+				var data = {
+					highest: highest,
+					rightest: rightest,
+					lowest: lowest,
+					leftest: leftest,
+					pT: paddingDataLabel.top,
+					pB: paddingDataLabel.bottom,
+					cW: chart.width,
+					cH: chart.height
+				};
+
+				console.log('data: ', data);
+
+				var top = Positioner.exceededPositions.top(data);
+				// paddings.right = Positioner.exceededPositions.right(
+				// 	params,
+				// 	paddings.right
+				// );
+				var right = Positioner.exceededPositions.right(data);
+				var bottom = Positioner.exceededPositions.bottom(data);
+				var left = Positioner.exceededPositions.left(data);
+				// paddings.left = Positioner.exceededPositions.left(
+				// 	params,
+				// 	paddings.left
+				// );
+				paddings.top = top !== 0 ? top : paddings.top;
+				paddings.right = right !== 0 ? right : paddings.bottom;
+				paddings.bottom = bottom !== 0 ? bottom : paddings.bottom;
+				paddings.left = left !== 0 ? left : paddings.left;
+
+				console.log('paddings: ', paddings);
+				if (hasAdjustments(paddings)) {
+					chart.options.layout.padding = paddings;
+					chart.update();
+				}
 
 				setTimeout(_fn, chart.config.options.animation.duration / 2);
-			});
-			this.isAdjusted = true;
+			}, time);
+			chart.$datalabels._adjusted = true;
 		}
 	}
 };

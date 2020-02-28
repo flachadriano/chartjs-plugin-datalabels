@@ -1,3 +1,4 @@
+var securePadding = 2;
 function orient(point, origin) {
 	var x0 = origin.x;
 	var y0 = origin.y;
@@ -247,34 +248,60 @@ export default {
 		);
 	},
 	exceededPositions: {
-		top: function(rect, top) {
-			if (rect.y < top * -1) {
-				top = rect.y * -1;
+		/* top: function(rect, top) {
+			if (rect.y < (rect.h / 2)) {
+				var y = rect.y < 0 ? rect.y * (-1) : rect.y;
+				var calc = ((rect.h / 2) + y);
+				if (calc > top) {
+					top = calc;
+				}
 			}
-			return top;
+			return (3.2254248593736845 + ((rect.h + rect.pT + rect.pB) / 2));
 		},
-		left: function(rect, left) {
-			if (rect.x < left * -1) {
-				left = rect.x * -1;
-			}
-			return left;
-		},
-		bottom: function(rect, bottom) {
-			var totalY = rect.y;
-
-			if (totalY < 0) {
-				bottom = totalY * -1;
-			}
-			return bottom;
-		},
-		right: function(w, rect, right) {
-			if (
-				rect.x > w &&
-				(right === 0 || right < rect.x - w)
-			) {
-				right = rect.x - w;
+		right: function(rect, right) {
+			if ((rect.x < (rect.w / 2)) && (((rect.w / 2) - rect.x) * -1) < right) {
+				right = ((rect.w / 2) + rect.x * -1);
 			}
 			return right;
+		},
+		bottom: function(rect, bottom) {
+			if ((rect.y + (rect.h / 2)) > rect.cH) {
+				var calc = ((rect.y - rect.cH) + (rect.h / 2)) + (rect.pT + rect.pB);
+				if (calc > bottom) {
+					bottom = calc;
+				}
+			}
+			return -3 + 11;// (45.506971531354715 + ((rect.h + rect.pT + rect.pB) / 2)) - rect.cH);
+		},
+		left: function(rect, left) {
+			if ((rect.x < (rect.w / 2)) && (((rect.w / 2) - rect.x) * -1) < left) {
+				left = ((rect.w / 2) + rect.x * -1);
+			}
+			return left;
+		} */
+		top: function(rect) {
+			if ((rect.highest.y - ((rect.highest.h) / 2)) < 0) {
+				return (((rect.highest.h) / 2) + Math.abs(rect.highest.y)) + securePadding;
+			}
+			return 0;
+		},
+		right: function(rect) {
+			if (Math.floor(rect.rightest.x + (rect.rightest.w / 2)) > Math.floor(rect.cW)) {
+				return ((rect.rightest.x + (rect.rightest.w / 2)) - rect.cW) + securePadding;
+			}
+			return 0;
+		},
+		bottom: function(rect) {
+			if (Math.floor(rect.lowest.y + (rect.lowest.h / 2)) > Math.floor(rect.cH)) {
+				return ((rect.lowest.y + (rect.lowest.h / 2)) - rect.cH) + securePadding;
+			}
+			return 0;
+		},
+		left: function(rect) {
+			if ((rect.leftest.x - ((rect.leftest.w) / 2)) < 0) {
+				return (((rect.leftest.w) / 2) + Math.abs(rect.leftest.x)) + securePadding;
+			}
+			return 0;
 		}
 	}
 };

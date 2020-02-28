@@ -1,7 +1,6 @@
 import Chart from 'chart.js';
 import utils from './utils';
 import positioners from './positioners';
-
 var helpers = Chart.helpers;
 var rasterize = utils.rasterize;
 
@@ -46,16 +45,16 @@ function getScaleOrigin(el) {
 }
 
 function getPositioner(el) {
-	if (el instanceof Chart.elements.Arc) {
+	// if (el instanceof Chart.elements.Arc) {
 		return positioners.arc;
-	}
-	if (el instanceof Chart.elements.Point) {
-		return positioners.point;
-	}
-	if (el instanceof Chart.elements.Rectangle) {
-		return positioners.rect;
-	}
-	return positioners.fallback;
+	// }
+	// if (el instanceof Chart.elements.Point) {
+	// 	return positioners.point;
+	// }
+	// if (el instanceof Chart.elements.Rectangle) {
+	// 	return positioners.rect;
+	// }
+	// return positioners.fallback;
 }
 
 function drawFrame(ctx, rect, model) {
@@ -256,7 +255,6 @@ helpers.extend(Label.prototype, {
 			)
 		};
 	},
-	isRendered: false,
 	update: function(context) {
 		var me = this;
 		var model = null;
@@ -334,7 +332,7 @@ helpers.extend(Label.prototype, {
 			ctx.clip();
 		}
 
-		if (this.isRendered || !model.clamp) {
+		if (chart.$datalabels._rendered || !model.clamp) {
 			ctx.globalAlpha = utils.bound(0, 1, 1);
 			ctx.translate(rasterize(center.x), rasterize(center.y));
 			ctx.rotate(model.rotation);

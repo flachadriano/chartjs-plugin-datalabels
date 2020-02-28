@@ -180,6 +180,8 @@ var plugin = {
 			chart[EXPANDO_KEY]._datasets,
 			options
 		);
+		chart[EXPANDO_KEY]._rendered = false;
+		chart[EXPANDO_KEY]._adjused = false;
 	},
 	afterDatasetUpdate: function(chart, args, options) {
 		var datasetIndex = args.index;
@@ -239,17 +241,19 @@ var plugin = {
 			chart[EXPANDO_KEY]._datasets,
 			options
 		);
+		console.log('b...');
 	},
 	afterRender: function(chart, options) {
 		if (options.clamp) {
 			layout.adjustLayout(chart, chart.$datalabels._labels, function() {
 				for (var i = 0; i < chart.$datalabels._labels.length; i++) {
 					var label = chart.$datalabels._labels[i];
-					chart.$datalabels._labels[i].isRendered = true;
 					label.renderTexts(chart, layout.center[i]);
 				}
-			});
+				chart[EXPANDO_KEY]._rendered = true;
+			}, 1000);
 		}
+		console.log('É2...')
 	},
 	afterDatasetsDraw: function(chart) {
 		layout.draw(chart, chart[EXPANDO_KEY]._labels);
@@ -299,6 +303,22 @@ var plugin = {
 		}
 
 		delete expando._dirty;
+	},
+	resize: function(chart) {
+		chart[EXPANDO_KEY]._adjusted = false;
+		/* if (chart.options && chart.options.plugins && chart.options.plugins.datalabels && chart.options.plugins.datalabels.clamp && layout.isRendered) {
+			layout.isAdjusted = false;
+			layout.adjustLayout(chart, chart.$datalabels._labels, function() {
+				for (var i = 0; i < chart.$datalabels._labels.length; i++) {
+					var label = chart.$datalabels._labels[i];
+					label.renderTexts(chart, layout.center[i]);
+				}
+				layout.isRendered = true;
+			}, 1000);
+		} */
+	},
+	afterDraw: function(chart) {
+		console.log('a... ');
 	}
 };
 

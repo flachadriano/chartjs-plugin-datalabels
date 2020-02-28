@@ -1,5 +1,5 @@
 {
-  "name": "@mrfeil/chartjs-plugin-datalabels",
+  "name": "chartjs-plugin-datalabels",
   "homepage": "https://chartjs-plugin-datalabels.netlify.com",
   "description": "Chart.js plugin to display labels on data elements with clamp function that adjust chart to show numbers",
   "version": "0.8.0",
