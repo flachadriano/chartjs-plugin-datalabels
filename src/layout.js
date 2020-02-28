@@ -209,6 +209,7 @@ export default {
 			var leftest = {w: 0, x: 0};
 
 			clearTimeout(chart.$datalabels._adjustTimer);
+			// eslint-disable-next-line max-statements
 			chart.$datalabels._adjustTimer = setTimeout(function() {
 				var paddingDataLabel =
 				chart.options &&
@@ -268,7 +269,7 @@ export default {
 					chart.update();
 				}
 
-				setTimeout(_fn, chart.config.options.animation.duration / 2);
+				setTimeout(_fn);
 			}, time);
 			chart.$datalabels._adjusted = true;
 		}

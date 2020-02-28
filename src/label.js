@@ -353,6 +353,7 @@ helpers.extend(Label.prototype, {
 		ctx.translate(rasterize(center.x), rasterize(center.y));
 		ctx.rotate(model.rotation);
 
+		drawFrame(ctx, rects.frame, model);
 		drawText(ctx, model.lines, rects.text, model);
 
 		ctx.restore();
