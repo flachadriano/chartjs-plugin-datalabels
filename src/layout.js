@@ -249,6 +249,7 @@ export default {
 					rightest: rightest,
 					lowest: lowest,
 					leftest: leftest,
+					paddings: paddings,
 					pT: paddingDataLabel.top,
 					pB: paddingDataLabel.bottom,
 					cW: chart.width,
@@ -264,12 +265,17 @@ export default {
 				paddings.bottom = bottom !== 0 ? bottom : paddings.bottom;
 				paddings.left = left !== 0 ? left : paddings.left;
 
+				if (chart.options.plugins.datalabels.debug) {
+					console.debug('data: ', data);
+					console.debug('paddings: ', paddings);
+				}
+
 				if (hasAdjustments(paddings)) {
 					chart.options.layout.padding = paddings;
 					chart.update();
 				}
 
-				setTimeout(_fn);
+				setTimeout(_fn, chart.options.animation.duration / 2);
 			}, time);
 			chart.$datalabels._adjusted = true;
 		}

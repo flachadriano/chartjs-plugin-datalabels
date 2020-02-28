@@ -45,16 +45,16 @@ function getScaleOrigin(el) {
 }
 
 function getPositioner(el) {
-	if (el instanceof Chart.elements.Arc) {
-		return positioners.arc;
-	}
-	if (el instanceof Chart.elements.Point) {
-		return positioners.point;
-	}
-	if (el instanceof Chart.elements.Rectangle) {
-		return positioners.rect;
-	}
-	return positioners.fallback;
+	// if (el instanceof Chart.elements.Arc) {
+	 	return positioners.arc;
+	// }
+	// if (el instanceof Chart.elements.Point) {
+		// return positioners.point;
+	// }
+	// if (el instanceof Chart.elements.Rectangle) {
+		// return positioners.rect;
+	// }
+	// return positioners.fallback;
 }
 
 function drawFrame(ctx, rect, model) {
@@ -332,23 +332,6 @@ helpers.extend(Label.prototype, {
 			ctx.clip();
 		}
 
-		if (chart.$datalabels._rendered || !model.clamp) {
-			ctx.globalAlpha = utils.bound(0, 1, 1);
-			ctx.translate(rasterize(center.x), rasterize(center.y));
-			ctx.rotate(model.rotation);
-
-			drawFrame(ctx, rects.frame, model);
-			drawText(ctx, model.lines, rects.text, model);
-
-			ctx.restore();
-		}
-	},
-	renderTexts: function(chart, center) {
-		var me = this;
-		var model = me._model;
-		var ctx = chart.ctx;
-		var rects = me._rects;
-
 		ctx.globalAlpha = utils.bound(0, 1, 1);
 		ctx.translate(rasterize(center.x), rasterize(center.y));
 		ctx.rotate(model.rotation);
@@ -357,6 +340,22 @@ helpers.extend(Label.prototype, {
 		drawText(ctx, model.lines, rects.text, model);
 
 		ctx.restore();
+	},
+	renderTexts: function(chart, center) {
+		/* var me = this;
+		var model = me._model;
+		var ctx = chart.ctx;
+		var rects = me._rects;
+
+		ctx.globalAlpha = utils.bound(0, 1, 1);
+		ctx.translate(rasterize(center.x), rasterize(center.y));
+		ctx.rotate(model.rotation);
+
+		console.log('chamou esse');
+		drawFrame(ctx, rects.frame, model);
+		drawText(ctx, model.lines, rects.text, model);
+
+		ctx.restore(); */
 	},
 	originRenderTexts: function(chart, center) {
 		var me = this;

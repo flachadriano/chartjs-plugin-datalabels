@@ -167,7 +167,9 @@ var plugin = {
 	id: 'datalabels',
 	beforeInit: function(chart) {
 		chart[EXPANDO_KEY] = {
-			_actives: []
+			_actives: [],
+			_rendered: false,
+			_adjusted: false
 		};
 	},
 	beforeUpdate: function(chart, options) {
@@ -180,8 +182,6 @@ var plugin = {
 			chart[EXPANDO_KEY]._datasets,
 			options
 		);
-		chart[EXPANDO_KEY]._rendered = false;
-		chart[EXPANDO_KEY]._adjused = false;
 	},
 	afterDatasetUpdate: function(chart, args, options) {
 		var datasetIndex = args.index;

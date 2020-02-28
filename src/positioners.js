@@ -249,8 +249,9 @@ export default {
 	},
 	exceededPositions: {
 		top: function(rect) {
-			if ((rect.highest.y - ((rect.highest.h) / 2)) < 0) {
-				return (((rect.highest.h) / 2) + Math.abs(rect.highest.y)) + securePadding;
+			rect.highest.y = rect.highest.y - rect.paddings.top;
+			if ((rect.highest.y - (rect.highest.h / 2)) < 0) {
+				return ((rect.highest.h / 2) - rect.highest.y) + securePadding;
 			}
 			return 0;
 		},
@@ -261,6 +262,7 @@ export default {
 			return 0;
 		},
 		bottom: function(rect) {
+			rect.lowest.y = rect.lowest.y - rect.paddings.bottom;
 			if (Math.floor(rect.lowest.y + (rect.lowest.h / 2)) > Math.floor(rect.cH)) {
 				return ((rect.lowest.y + (rect.lowest.h / 2)) - rect.cH) + securePadding;
 			}
