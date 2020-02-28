@@ -4,10 +4,10 @@ function orient(point, origin) {
 	var y0 = origin.y;
 
 	if (x0 === null) {
-		return { x: 0, y: -1 };
+		return {x: 0, y: -1};
 	}
 	if (y0 === null) {
-		return { x: 1, y: 0 };
+		return {x: 1, y: 0};
 	}
 
 	var dx = point.x - x0;
@@ -248,37 +248,6 @@ export default {
 		);
 	},
 	exceededPositions: {
-		/* top: function(rect, top) {
-			if (rect.y < (rect.h / 2)) {
-				var y = rect.y < 0 ? rect.y * (-1) : rect.y;
-				var calc = ((rect.h / 2) + y);
-				if (calc > top) {
-					top = calc;
-				}
-			}
-			return (3.2254248593736845 + ((rect.h + rect.pT + rect.pB) / 2));
-		},
-		right: function(rect, right) {
-			if ((rect.x < (rect.w / 2)) && (((rect.w / 2) - rect.x) * -1) < right) {
-				right = ((rect.w / 2) + rect.x * -1);
-			}
-			return right;
-		},
-		bottom: function(rect, bottom) {
-			if ((rect.y + (rect.h / 2)) > rect.cH) {
-				var calc = ((rect.y - rect.cH) + (rect.h / 2)) + (rect.pT + rect.pB);
-				if (calc > bottom) {
-					bottom = calc;
-				}
-			}
-			return -3 + 11;// (45.506971531354715 + ((rect.h + rect.pT + rect.pB) / 2)) - rect.cH);
-		},
-		left: function(rect, left) {
-			if ((rect.x < (rect.w / 2)) && (((rect.w / 2) - rect.x) * -1) < left) {
-				left = ((rect.w / 2) + rect.x * -1);
-			}
-			return left;
-		} */
 		top: function(rect) {
 			if ((rect.highest.y - ((rect.highest.h) / 2)) < 0) {
 				return (((rect.highest.h) / 2) + Math.abs(rect.highest.y)) + securePadding;
